@@ -16,7 +16,7 @@ export default function App() {
     isError: false
   })
 
-  const [username, setUsername] = useState<string | undefined>(undefined)
+  const [usernameSignedIn, setUsernameSignedIn] = useState<string | undefined>(undefined)
   const [client, setClient] = useState<Client | undefined>(undefined)
   const [clientMessages, setClientMessages] = useState<ClientMessage[]>([])
   const [errorMessage, setErrorMessage] = useState<string>("")
@@ -34,7 +34,7 @@ export default function App() {
 
     const onConnect = () => {
       setState({ isConnected: true, isError: false })
-      setUsername(username)
+      setUsernameSignedIn(username)
       setClient(stompClient)
 
       stompClient.subscribe('/users/queue/messages', (message: Message) => {
@@ -50,12 +50,13 @@ export default function App() {
         setErrorMessage("Could not connect to server")
       }
 
+       //Todo it does not work, fix this
       if (state.isConnected) {
         setErrorMessage("Disconnected")
       }
 
       setState({ isConnected: false, isError: true })
-      setUsername(undefined)
+      setUsernameSignedIn(undefined)
       setClient(undefined)
     }
 
@@ -77,7 +78,7 @@ export default function App() {
       <Stack align="center" spacing="xl">
         {state.isError ? <ErrorNotification message={errorMessage} /> : <></>}
         {!state.isConnected ? <ConnectPanel handleConnect={connect} /> : <></>}
-        {state.isConnected ? <ChatPanel username={username} handleSend={send} messages={clientMessages} /> : <></>}
+        {state.isConnected ? <ChatPanel usernameSignedIn={usernameSignedIn} handleSend={send} messages={clientMessages} /> : <></>}
       </Stack>
     </ThemeProvider>
   );
