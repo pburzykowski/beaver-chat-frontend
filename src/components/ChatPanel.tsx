@@ -7,36 +7,40 @@ import ConversationTab from "./ConversationTab";
 
 const ChatPanel = (props: any) => {
 
-    const [usernameSelected, setUsernameSelected] = useState<string | null>(null);
+    const [selectedConversationWithUsername, setSelectedConversationWithUsername] = useState<string | null>(null);
 
-    const converstationsWithUsers = Array.from(
+    const converstationWithUsernames = Array.from(
         new Set([
             ...props.messages.map((message: ClientMessage) => message.fromUser),
             ...props.messages.map((message: ClientMessage) => message.toUser)]))
         .filter((user: string) => user !== props.usernameSignedIn)
 
 
-    const conversationTabs = converstationsWithUsers.map((username: string) => {
-        const messagesInConversationCount = props.messages.filter((message: ClientMessage) => message.fromUser === username || message.toUser === username ).length
-        const isActiveTab = usernameSelected === username 
 
-        return <ConversationTab messagesCount={messagesInConversationCount} username={username} isActiveTab={isActiveTab}  />
+    const includesUser = (message: ClientMessage, usernameSelected: String | null) => {
+        return message.fromUser === usernameSelected || message.toUser == usernameSelected
+    }
+
+    const conversationTabs = converstationWithUsernames.map((username: string) => {
+        const messagesInConversationCount = props.messages.filter((message: ClientMessage) => includesUser(message, username)).length
+        const isSelected = selectedConversationWithUsername === username
+
+        return <ConversationTab messagesCount={messagesInConversationCount} tabname={username} isSelected={isSelected} />
     })
 
-    const selectedConversationMessages = props.messages.filter((message: ClientMessage) =>
-    message.fromUser === usernameSelected || (message.fromUser === props.usernameSignedIn && message.toUser == usernameSelected));
+    const selectedConversationMessages = props.messages.filter((message: ClientMessage) => includesUser(message, selectedConversationWithUsername))
 
 
-    if (usernameSelected === null && converstationsWithUsers.length > 0) {
-        const firstUser = converstationsWithUsers[0]
-        setUsernameSelected(firstUser)
+    if (selectedConversationWithUsername === null && converstationWithUsernames.length > 0) {
+        const firstConversationUsername = converstationWithUsernames[0]
+        setSelectedConversationWithUsername(firstConversationUsername)
     }
 
 
     return (
         <>
             <Text mt={50}>You're logged in as: <b>{props.usernameSignedIn}</b></Text>
-            <Tabs value={usernameSelected} onTabChange={setUsernameSelected}>
+            <Tabs value={selectedConversationWithUsername} onTabChange={setSelectedConversationWithUsername}>
                 <Tabs.List>
                     {conversationTabs}
                 </Tabs.List>
